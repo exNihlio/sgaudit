@@ -24,8 +24,7 @@ def main():
     # Exit code
     e = 0
     path = os.path.dirname(os.path.realpath(__file__))
-    # Need to pass in the path so this function can 
-    # always open regions.json
+    # Need to pass in the path so this function can always open regions.json
     getRegionsRC = testGetRegions(path)
     if getRegionsRC == 0:
         print(f"{c.OKGREEN}getRegions() passed{c.ENDC}") 
@@ -34,14 +33,15 @@ def main():
             print(f"{c.FAIL}getRegions() failed: {getRegionsRC} regions not found{c.ENDC}")
             e = 1
         else:
-            print(f"{c.FAIL}{getRegionsRC}{c.ENDC}")
+            print(f"{c.FAIL}getRegions() failed: {getRegionsRC}{c.ENDC}")
             e = 1
+
     # Test getInstances() function
     getInstancesRC = testGetInstances()
     if getInstancesRC == 0:
         print(f"{c.OKGREEN}getInstances() passed{c.ENDC}")
     else:
-        print(f"{c.FAIL}{getInstancesRC}{c.ENDC}")
+        print(f"{c.FAIL}getInstances() failed: {getInstancesRC}{c.ENDC}")
         e = 1
 
     sys.exit(e)
@@ -57,7 +57,10 @@ def testGetRegions(path):
     validRegions = json.loads(open(f'{path}/data/regions.json').read())
     ec2 = boto3.client('ec2')
     # Check if our getRegions function returns correctly
-    testRegions = getRegions(ec2)
+    try:
+        testRegions = getRegions(ec2)
+    except:
+        return "Err: Could not extract regions. Malformed data?"
     # Iterate through the regions JSON dict, if any of these are not in
     # the list of regions returned by getRegions(), something went wrong.
     for i in validRegions['regions']:
@@ -70,11 +73,19 @@ def testGetInstances():
     rc = 0
     regions = ['us-west-1', 'us-west-2', 'us-east-1', 'us-east-2']
     for r in regions:
-        ec2 = boto3.client('ec2')
-        instances = getInstances(r)
-        statusCode = instances['ResponseMetadata']['HTTPStatusCode']
+        #ec2 = boto3.client('ec2')
+        try:
+            instances = getInstances(r)
+        except:
+            return "Err: Could not retrieve instances."
+
+        try:
+            statusCode = instances['ResponseMetadata']['HTTPStatusCode']
+        except:
+            return "Err: Could not extract status code. Malformed data?"
+
         if statusCode != 200:
-            return f"Err: HTTP: {statusCode}: getInstances() failed"
+            return f"Err: HTTP: {statusCode}"
     
     return rc
         

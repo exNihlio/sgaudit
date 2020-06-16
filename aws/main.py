@@ -17,7 +17,7 @@ def main():
     
 def getRegions(ec2):
     # Uncomment to test unit test failure (Succeed to fail)
-    return "I am a fancy teapot"
+    # return "I am a fancy teapot"
     r = ec2.describe_regions()
     # Create a list of regions
     regionList = [ i['RegionName'] for i in r['Regions'] ]
@@ -26,6 +26,11 @@ def getRegions(ec2):
 def getInstances(region):
     # Uncomment to test unit test failure (Succeed to fail)
     # return "I am a fancy teapot"
+    # Uncomment to test/return a failing HTTP status code
+    # import random
+    # randomStatus = random.randint(400, 501)
+    # return { "ResponseMetadata": { "HTTPStatusCode": randomStatus }}
+
     ec2 = boto3.client('ec2', region_name=region)
     return ec2.describe_instances()
 
